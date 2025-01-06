@@ -1,0 +1,68 @@
+<div class="head-content">
+    <br>
+    <h3 style="text-align: center">DASHBOARD</h3>
+
+    <div 
+        class="d-flex align-items-center"
+        style="padding-left: 0.5rem; font-size: 16px;"
+    >
+        <button class="btn btn-danger" style="font-size: 16px;" (click)="goToBotList()">Bot List</button>
+        <span style="margin: 0 0.5rem;">-></span>
+        <div *ngIf="showBotDetails">
+            Bot Details
+        </div>
+    </div>
+</div>
+<br>
+
+
+<div class="row" style="padding: 0 0.5rem;" *ngIf="!showBotDetails">
+    <table class="table table-hover">
+        <thead class="table-light">
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Bot Name</th>
+                <th scope="col">Broker</th>
+                <th scope="col">Strategy</th>
+                <th scope="col">Symbol & <br> Timeframe</th>
+                <th scope="col">Status</th>
+                <th scope="col">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <ng-container *ngIf="loading">
+                <tr>
+                    <td colspan="7" style="text-align: center;">
+                        <div class="d-flex justify-content-center" style="padding: 1rem; width: 100%;">
+                            <div class="spinner-grow text-warning" role="status" style="width: 3rem; height: 3rem;">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </td>
+
+                </tr>
+            </ng-container>
+            <ng-container *ngIf="!loading">
+                <tr *ngIf="!botList.length">
+                    <td colspan="7" style="text-align: center;">No bots found</td>
+                </tr>
+            
+                <tr *ngFor="let bot of botList; let i = index">
+                    <td>{{ i + 1 }}</td>
+                    <td>{{ bot.botName }}</td>
+                    <td>{{ bot.broker }}</td>
+                    <td>{{ bot.strategy }}</td>
+                    <td>{{ bot.symbol }} | {{ bot.timeframe }}</td>
+                    <td>{{ bot.status }}</td>
+                    <td>
+                        <button class="btn btn-primary" (click)="handleAction('view', bot)">View</button>
+                    </td>
+                </tr>
+            </ng-container>
+        </tbody>
+    </table>
+</div>
+
+<ng-container *ngIf="showBotDetails && selectedBot">
+    <app-bot-details  [botId]="selectedBot.botId"></app-bot-details>
+</ng-container>

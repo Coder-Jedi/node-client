@@ -1,0 +1,238 @@
+<div class="row">
+    <h3 class="d-flex justify-content-between align-items-center" style="width: 90%; padding-left: 1rem;">
+        <span>{{botDetails?.botName}}</span>
+        <div class="d-flex align-items-center" style="column-gap: 1rem;">
+            <button class="btn btn-secondary" (click)="refreshData()">
+                Refresh
+            </button>
+            <span 
+                class="badge text-bg-{{ botDetails.status === 'ACTIVE' ? 'success' : 'danger' }}"
+                style="font-size: 13px;"
+            >
+                {{ botDetails.status }}
+            </span>
+        </div>
+    </h3>
+    <hr style="width: 90%; margin-bottom: 1.6rem;">
+
+    <div class="horizontal-navbar">
+        <div
+            *ngFor="let tab of tabs"
+            (click)="setActiveTab(tab)"
+            class="navbar-tab"
+            [class.active]="tab === activeTab"
+        >
+            {{ tab.title }}
+        </div>
+    </div>
+
+    <div class="tab-content">
+        <div *ngIf="activeTab === tabs[0]">
+            <ng-container [ngTemplateOutlet]="overviewTab"></ng-container>
+        </div>
+        <div *ngIf="activeTab === tabs[1]">
+            <ng-container [ngTemplateOutlet]="runningLogsTab"></ng-container>
+        </div>
+        <div *ngIf="activeTab === tabs[2]">
+            <ng-container [ngTemplateOutlet]="ordersTab"></ng-container>
+        </div>
+    </div>
+
+
+    <!--  overview tab -->
+    <ng-template #overviewTab>
+        <br>
+        <div class="row" *ngIf="botDetails">
+            <div class="col-md-6">
+                <h4>Configuration:</h4>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <ng-container *ngIf="botDetails">
+                            <tr>
+                                <td>Status</td>
+                                <td>
+                                    <span 
+                                        class="badge text-bg-{{ botDetails.status === 'ACTIVE' ? 'success' : 'danger' }}"
+                                        style="font-size: 13px;"
+                                    >
+                                        {{ botDetails.status }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr *ngFor="let item of configurationKeys">
+                                <td>{{ item.title }}</td>
+                                <td>{{ botDetails[item.key] }}</td>
+                            </tr>
+                        </ng-container>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h4>Action:</h4>
+                <div class="d-flex" style="gap: 2rem;">
+                    <button class="btn btn-success" (click)="handleAction('start')">START BOT</button>
+                    <button class="btn btn-danger" (click)="handleAction('stop')">STOP BOT</button>
+                </div>
+            </div>
+        </div>
+        <div class="row" *ngIf="!botDetails">
+            <div class="col-md-12">
+                <h4>No bot details found.</h4>
+                <span>Bot ID: {{botId}}</span>
+            </div>
+        </div>
+    </ng-template>
+
+    <!-- runningLogs tab -->
+    <ng-template #runningLogsTab>
+        <br>
+        <div class="row" *ngIf="runningLogs?.length">
+            <div class="col-md-10">
+                <h4>Running Logs:</h4>
+                <br>
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Type</th>
+                            <th>Action Type</th>
+                            <th>Message</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <ng-container>
+                            <tr *ngFor="let item of runningLogs | paginate : { itemsPerPage: 10, currentPage: q };">
+                                <td>{{ convertTimestampToLocaleString(item.timestamp) }}</td>
+                                <td>{{ item.type }}</td>
+                                <td>{{ item?.data?.actionType }}</td>
+                                <td>{{ item.message }}</td>
+                            </tr>
+                        </ng-container>
+                        <pagination-controls
+                            class="text-end"
+                            (pageChange)="q = $event"
+                        ></pagination-controls>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row" *ngIf="!runningLogs?.length">
+            <div class="col-md-12">
+                <h4>No running logs found.</h4>
+                <span>Bot ID: {{botId}}</span>
+            </div>
+        </div>
+    </ng-template>
+
+    <!-- orders tab -->
+    <ng-template #ordersTab>
+        <br>
+        <div class="row" *ngIf="botOrders?.length" style="padding-right: 1rem;">
+            <div class="col-md-12">
+                <h4>Orders:</h4>
+                <br>
+                <table class="table table-bordered table-hover table-responsive">
+                    <thead>
+                        <tr>
+                            <th>Start Time</th>
+                            <th>Contract <br> Type</th>
+                            <th>Duration</th>
+                            <th>Amount</th>
+                            <th>Expected <br> Payout</th>
+                            <th>Actual <br> Payout</th>
+                            <th>Status</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <ng-container>
+                            <tr *ngFor="let item of botOrders | paginate : { itemsPerPage: 10, currentPage: q };">
+                                <td>{{ convertUnixTimestampToLocaleString(item?.binaryOrder?.startTime) }}</td>
+                                <td>{{ item?.binaryOrder?.contract_type }}</td>
+                                <td>{{ item?.binaryOrder?.duration }}</td>
+                                <td>{{ item?.binaryOrder?.amount }}</td>
+                                <td>{{ item?.binaryOrder?.expectedPayout }}</td>
+                                <td>{{ item?.binaryOrder?.actualPayout }}</td>
+                                <td>{{ item?.binaryOrder?.status }}</td>
+                                <td
+                                    [ngStyle]="{
+                                        'color': item?.binaryOrder?.result === 'WIN' ? '#198754' : item?.binaryOrder?.result === 'LOSS' ? '#dc3545' : 'black',
+                                        'font-weight': 'bold'
+                                    }"
+                                >
+                                    {{ item?.binaryOrder?.result }}
+                                </td>
+                            </tr>
+                        </ng-container>
+                        <pagination-controls
+                            class="text-end"
+                            (pageChange)="q = $event"
+                        ></pagination-controls>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row" *ngIf="!botOrders?.length">
+            <div class="col-md-12">
+                <h4>No order logs found.</h4>
+                <span>Bot ID: {{botId}}</span>
+            </div>
+        </div>
+    </ng-template>
+</div>
+
+<div class="overlay-loader" *ngIf="loading">
+    <div class="spinner-grow text-warning" role="status" style="width: 5rem; height: 5rem;">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+<div class="d-flex" style="position: absolute;">
+    <button 
+        data-bs-toggle="modal" data-bs-target="#startStopBotModal"
+        style="visibility: hidden;"
+        #openModalButton
+    >
+        Open Start/Stop Modal
+    </button>
+</div>
+<!-- start bot form inside bootstrap modal -->
+<div class="modal fade" id="startStopBotModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="startStopBotModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="startStopBotModalLabel">{{modalType==='start'? 'START':'STOP'}} BOT</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" #closeModalButton (click)="resetModal()"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-11">
+                <label for="field.apiKey" class="form-label fs-6 text-primary">
+                    Message (Optional)
+                </label>
+                <div class="input">
+                    <input
+                        [(ngModel)]="modalMessage"
+                        [ngModelOptions]="{standalone: true}"
+                        class="form-control"
+                        type="text"
+                        placeholder="Enter message"
+                    />
+                </div>
+            </div>
+          </div>
+          <br>
+        </div>
+        <div class="modal-footer justify-content-around">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="resetModal()">Close</button>
+          <button type="button" class="btn btn-success" (click)="handleAction('modalSubmit')">{{modalType==='start'? 'START':'STOP'}}</button>
+        </div>
+      </div>
+    </div>
+</div>

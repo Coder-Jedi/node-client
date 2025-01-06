@@ -1,0 +1,140 @@
+@keyframes slideDown {
+  0% {
+    transform: translate3d(0, -0.5rem, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes popup {
+  0% {
+    transform: translate3d(0, 100%, 0);
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes slider-slideup {
+  0% {
+    transform: translate3d(0, 2rem, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translate3d(0, 0.5rem, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes slideDownAddToHome {
+  0% {
+    transform: translate3d(0, -4rem, 0);
+  }
+  100% {
+    display: block;
+    transform: translate3d(0, 0%, 0);
+  }
+}
+
+@keyframes arrow {
+  0% {
+    transform: translateX(0);
+  }
+
+  50% {
+    transform: translateX(0.5rem);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes cookie-float {
+  0% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(1rem);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes closepopup {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, 100%, 0);
+  }
+}
+
+@keyframes fadein {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeout {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(359deg);
+  }
+}
+
+@keyframes cookie-left {
+  0% {
+    transform: translate(-20%, 0) rotate(353deg);
+  }
+
+  100% {
+    transform: translate(-98%, 0) rotate(353deg);
+  }
+}
+
+@keyframes cookie-right {
+  0% {
+    transform: translate(20%, 0) rotate(8deg);
+  }
+
+  100% {
+    transform: translate(98%, 0) rotate(8deg);
+  }
+}
+
+@keyframes cookie-text {
+  0% {
+    transform: scale(0.3);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}

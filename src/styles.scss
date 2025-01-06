@@ -1,1 +1,17 @@
 /* You can add global styles to this file, and also import other style files */
+
+@import './assets/styles/main';
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+// Variable overrides first
+$primary: #900;
+$enable-shadows: true;
+$prefix: "mo-";
+
+// Then import Bootstrap
+@import "../node_modules/bootstrap/scss/bootstrap";
+
+// toastr for bootstrap5
+@import 'ngx-toastr/toastr-bs5-alert';

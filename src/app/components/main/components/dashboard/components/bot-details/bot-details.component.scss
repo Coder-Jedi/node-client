@@ -1,0 +1,68 @@
+@import "../../../../../../../assets/styles/helpers/mixins";
+
+.row{
+    margin-left: 0;
+  }
+
+  .overlay-loader{
+    position: fixed;
+    top: 0;
+    left: 250px;
+    right: 0;
+    bottom: 0;
+
+    background-color: rgba(0, 0, 0, 0.5);
+    @include flex-container();
+  }
+
+  // <div class="horizontal-navbar">
+  //       <div
+  //           *ngFor="let tab of tabs"
+  //           (click)="setActiveTab(tab)"
+  //           class="navbar-tab"
+  //           [class.active]="tab === activeTab"
+  //       >
+  //           {{ tab.title }}
+  //       </div>
+  //   </div>
+
+.horizontal-navbar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: center;
+    width: 96%;
+    background-color: #f0f0f0;
+    border-bottom: 1px solid #ccc;
+    border-radius: 2.2vw;
+    margin: 0 auto;
+    padding: 0;
+    margin-bottom: 1rem;
+
+    .navbar-tab {
+      height: 3rem;
+      @include flex-container();
+      cursor: pointer;
+      font-weight: bold;
+      color: #333;
+      transition: background-color 0.3s ease;
+      text-align: center;
+      &:hover {
+          background-color: #e0e0e0;
+      }
+      &.active {
+          background-color: #d0d0d0;
+      }
+    }
+    .navbar-tab:first-child {
+        border-top-left-radius: 2.2vw;
+        border-bottom-left-radius: 2.2vw;
+    }
+    .navbar-tab:last-child {
+        border-top-right-radius: 2.2vw;
+        border-bottom-right-radius: 2.2vw;
+    }
+    .navbar-tab:nth-child(2) {
+        border-left: 1px solid #ccc;
+        border-right: 1px solid #ccc;
+    }
+  }

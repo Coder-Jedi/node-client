@@ -1,0 +1,10 @@
+<div class="side-nav-component">
+    <div 
+        class="side-nav-item" 
+        *ngFor="let item of navItems" 
+        (click)="navigate(item)"
+        [ngClass]="{'active': currRoute === item.route}"
+    >
+        {{ item.name }}
+    </div>
+</div>

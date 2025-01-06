@@ -1,0 +1,24 @@
+@import "variables";
+
+@mixin flex-container($align: center, $justify: center, $direction: row) {
+  display: flex;
+  align-items: $align;
+  justify-content: $justify;
+  flex-direction: $direction;
+}
+
+@mixin positioning() {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+}
+
+@mixin font($minimum, $preffered, $maximum, $family: regular, $color: #000) {
+  $minimum: $minimum/$primary-font-size-value + rem;
+  $maximum: $maximum/$primary-font-size-value + rem;
+
+  color: $color;
+  font-size: clamp(#{$minimum}, #{$preffered}, #{$maximum});
+}

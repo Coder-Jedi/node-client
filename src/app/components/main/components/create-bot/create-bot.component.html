@@ -1,0 +1,200 @@
+<div class="head-content">
+  <br />
+  <h3 style="text-align: center">CREATE BOT</h3>
+</div>
+
+<div style="flex-grow: 1;">
+
+
+<form [formGroup]="createBotForm" style="height: 100%; overflow: auto;">
+  <div class="row" style="max-width: 500px; margin: 0">
+    <!-- broker -->
+    <div class="row mt-4 d-flex align-items-center justify-content-center">
+      <div class="col-md-12">
+        <ng-container *ngIf="formFields.broker as field">
+          <label for="field.apiKey" class="form-label fs-6 text-primary">
+            {{ field?.label }} {{ field?.required ? "*" : "" }}
+          </label>
+          <select
+            [formControlName]="field.apiKey"
+            style="cursor: pointer"
+            [id]="field.apiKey"
+            [placeholder]="field.placeholder"
+            class="form-select"
+            (change)="onBrokerChange($event)"
+          >
+            <option disabled>
+              {{ field.placeholder }}
+            </option>
+            <option *ngFor="let item of selectData.broker" [value]="item.name">
+              {{ item.label }}
+            </option>
+          </select>
+        </ng-container>
+      </div>
+    </div>
+    <!-- strategy -->
+    <div class="row mt-4 d-flex align-items-center justify-content-center">
+      <div class="col-md-12">
+        <ng-container *ngIf="formFields.strategy as field">
+          <label for="field.apiKey" class="form-label fs-6 text-primary">
+            {{ field?.label }} {{ field?.required ? "*" : "" }}
+          </label>
+          <select
+            [formControlName]="field.apiKey"
+            style="cursor: pointer"
+            [id]="field.apiKey"
+            [placeholder]="field.placeholder"
+            class="form-select"
+            (change)="onStrategyChange($event)"
+          >
+            <option disabled *ngIf="!selectData.strategy.length">
+              {{ field.placeholder2 }}
+            </option>
+            <option disabled *ngIf="selectData.strategy.length">
+              {{ field.placeholder }}
+            </option>
+            <option
+              *ngFor="let item of selectData.strategy"
+              [value]="item.name"
+            >
+              {{ item.label }}
+            </option>
+          </select>
+        </ng-container>
+      </div>
+    </div>
+    <!-- symbol -->
+    <div class="row mt-4 d-flex align-items-center justify-content-center">
+      <div class="col-md-12">
+        <ng-container *ngIf="formFields.symbol as field">
+          <label for="field.apiKey" class="form-label fs-6 text-primary">
+            {{ field?.label }} {{ field?.required ? "*" : "" }}
+          </label>
+          <select
+            [(ngModel)]="selectedSymbolTimeframe"
+            [ngModelOptions]="{standalone: true}"
+            style="cursor: pointer"
+            [id]="field.apiKey"
+            [placeholder]="field.placeholder"
+            class="form-select"
+            (change)="onSymbolChange($event)"
+          >
+            <option disabled *ngIf="!selectData.strategy.length">
+              {{ field.placeholder2 }}
+            </option>
+            <option disabled *ngIf="selectData.strategy.length">
+              {{ field.placeholder }}
+            </option>
+            <option
+              *ngFor="let item of selectData.symbol"
+              [value]="item.name"
+            >
+              {{ item.label }}
+            </option>
+          </select>
+        </ng-container>
+      </div>
+    </div>
+    <!-- bot name -->
+    <div class="row mt-4 d-flex align-items-center justify-content-center">
+      <div class="col-md-12">
+        <ng-container
+          [ngTemplateOutlet]="textInput"
+          [ngTemplateOutletContext]="{ $implicit: formFields.botName }"
+        ></ng-container>
+      </div>
+    </div>
+
+    <!-- additional params for broker -->
+    <div
+      class="row mt-4 d-flex align-items-center justify-content-center"
+      *ngFor="let field of additionalParams"
+    >
+        <div class="col-md-12">
+            <ng-container
+                [ngTemplateOutlet]="textInput"
+                [ngTemplateOutletContext]="{ $implicit: field }"
+                *ngIf="field.type === 'text'"
+            ></ng-container>
+            <ng-container
+                [ngTemplateOutlet]="numberInput"
+                [ngTemplateOutletContext]="{ $implicit: field }"
+                *ngIf="field.type === 'number'"
+            ></ng-container>
+        </div>
+    </div>
+
+    <div class="row mt-5 d-flex align-items-center justify-content-center">
+      <button
+        type="button"
+        class="btn btn-primary mt-2"
+        [disabled]="createBotForm.invalid || !createBotForm.dirty"
+        style="width: 20rem; border-radius: 1rem"
+        (click)="onSubmit()"
+      >
+        Submit
+      </button>
+    </div>
+  </div>
+
+  <!-- templates -->
+  <!-- text input template -->
+  <ng-template #textInput let-field>
+    <label for="field.apiKey" class="form-label fs-6 text-primary">
+      {{ field?.label }} {{ field?.required ? "*" : "" }}
+    </label>
+    <div class="input">
+      <input
+        [formControlName]="field?.apiKey"
+        [id]="field?.apiKey"
+        class="form-control"
+        type="text"
+        [placeholder]="field?.placeholder"
+        [maxlength]="field?.max_length"
+      />
+      <div *ngIf="field?.max_length" class="text-count">
+        {{ createBotForm.controls?.[field?.apiKey]?.value?.length || '0' }}/{{
+          field?.max_length
+        }}
+      </div>
+    </div>
+    <div
+      *ngIf="createBotForm.controls?.[field?.apiKey]?.invalid && (createBotForm.controls?.[field?.apiKey]?.dirty || createBotForm.controls?.[field?.apiKey]?.touched)"
+      class="error text-danger"
+    >
+      <div *ngIf="createBotForm.controls?.[field?.apiKey]?.errors?.required">
+        {{ "This field cannot be empty." }}
+      </div>
+    </div>
+  </ng-template>
+  <!-- number input template -->
+  <ng-template #numberInput let-field>
+    <label for="field.apiKey" class="form-label fs-6 text-primary">
+      {{ field?.label }} {{ field?.required ? "*" : "" }}
+    </label>
+    <div class="input">
+      <input
+        [formControlName]="field?.apiKey"
+        [id]="field?.apiKey"
+        class="form-control"
+        type="number"
+        [placeholder]="field?.placeholder"
+        [min]="field?.min"
+        [readOnly]="field?.readonly"
+        [class.readonly]="field?.readonly"
+      />
+    </div>
+    <div
+      *ngIf="createBotForm.controls?.[field?.apiKey]?.invalid && (createBotForm.controls?.[field?.apiKey]?.dirty || createBotForm.controls?.[field?.apiKey]?.touched)"
+      class="error text-danger"
+    >
+      <div *ngIf="createBotForm.controls?.[field?.apiKey]?.errors?.required">
+        {{ "This field cannot be empty." }}
+      </div>
+    </div>
+  </ng-template>
+
+</form>
+
+</div>
