@@ -67,33 +67,19 @@
     <!-- symbol -->
     <div class="row mt-4 d-flex align-items-center justify-content-center">
       <div class="col-md-12">
-        <ng-container *ngIf="formFields.symbol as field">
-          <label for="field.apiKey" class="form-label fs-6 text-primary">
-            {{ field?.label }} {{ field?.required ? "*" : "" }}
-          </label>
-          <select
-            [(ngModel)]="selectedSymbolTimeframe"
-            [ngModelOptions]="{standalone: true}"
-            style="cursor: pointer"
-            [id]="field.apiKey"
-            [placeholder]="field.placeholder"
-            class="form-select"
-            (change)="onSymbolChange($event)"
-          >
-            <option disabled *ngIf="!selectData.strategy.length">
-              {{ field.placeholder2 }}
-            </option>
-            <option disabled *ngIf="selectData.strategy.length">
-              {{ field.placeholder }}
-            </option>
-            <option
-              *ngFor="let item of selectData.symbol"
-              [value]="item.name"
-            >
-              {{ item.label }}
-            </option>
-          </select>
-        </ng-container>
+        <ng-container
+          [ngTemplateOutlet]="textInput"
+          [ngTemplateOutletContext]="{ $implicit: formFields.symbol}"
+        ></ng-container>
+      </div>
+    </div>
+    <!-- timeframe -->
+    <div class="row mt-4 d-flex align-items-center justify-content-center">
+      <div class="col-md-12">
+        <ng-container
+          [ngTemplateOutlet]="numberInput"
+          [ngTemplateOutletContext]="{ $implicit: formFields.timeframe}"
+        ></ng-container>
       </div>
     </div>
     <!-- bot name -->
@@ -107,6 +93,12 @@
     </div>
 
     <!-- additional params for broker -->
+     <!-- Broker Parameters heading -->
+    <div class="row mt-5 d-flex align-items-center justify-content-center" *ngIf="additionalParams?.length">
+      <div class="col-md-12">
+        <h5 class="text-primary">Broker Parameters</h5>
+      </div>
+    </div>
     <div
       class="row mt-4 d-flex align-items-center justify-content-center"
       *ngFor="let field of additionalParams"
@@ -125,10 +117,35 @@
         </div>
     </div>
 
-    <div class="row mt-5 d-flex align-items-center justify-content-center">
+     <!-- configurable params for strategy -->
+     <!-- Strategy Parameters heading -->
+     <div class="row mt-5 d-flex align-items-center justify-content-center" *ngIf="configurableParams?.length">
+      <div class="col-md-12">
+        <h5 class="text-primary">Strategy Parameters</h5>
+      </div>
+    </div>
+    <div
+      class="row mt-4 d-flex align-items-center justify-content-center"
+      *ngFor="let field of configurableParams"
+    >
+        <div class="col-md-12">
+            <ng-container
+                [ngTemplateOutlet]="textInput"
+                [ngTemplateOutletContext]="{ $implicit: field }"
+                *ngIf="field.type === 'text'"
+            ></ng-container>
+            <ng-container
+                [ngTemplateOutlet]="numberInput"
+                [ngTemplateOutletContext]="{ $implicit: field }"
+                *ngIf="field.type === 'number'"
+            ></ng-container>
+        </div>
+    </div>
+
+    <div class="row mt-5 mb-5 d-flex align-items-center justify-content-center">
       <button
         type="button"
-        class="btn btn-primary mt-2"
+        class="btn btn-primary mt-2 mb-4"
         [disabled]="createBotForm.invalid || !createBotForm.dirty"
         style="width: 20rem; border-radius: 1rem"
         (click)="onSubmit()"

@@ -81,6 +81,48 @@
                 </div>
             </div>
         </div>
+        <div class="row mt-5" *ngIf="botDetails">
+            <div class="col-md-6">
+                <h4>Broker Parameters:</h4>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <ng-container *ngIf="botDetails?.additionalParams">
+                            <tr *ngFor="let item of botDetails?.additionalParams | keyvalue">
+                                <td>{{ item.key }}</td>
+                                <td>{{ item.value }}</td>
+                            </tr>
+                        </ng-container>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row mt-5 mb-5" *ngIf="botDetails">
+            <div class="col-md-6">
+                <h4>Strategy Parameters:</h4>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <ng-container *ngIf="botDetails?.configurableParams">
+                            <tr *ngFor="let item of botDetails?.configurableParams | keyvalue">
+                                <td>{{ item.key }}</td>
+                                <td>{{ item.value }}</td>
+                            </tr>
+                        </ng-container>
+                    </tbody>
+                </table>
+            </div>
+        </div>
         <div class="row" *ngIf="!botDetails">
             <div class="col-md-12">
                 <h4>No bot details found.</h4>

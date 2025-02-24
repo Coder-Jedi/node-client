@@ -15,10 +15,9 @@ export class CreateBotComponent implements OnInit {
   selectData = {
     broker: [],
     strategy: [],
-    symbol: []
   };
   additionalParams = [];
-  selectedSymbolTimeframe = '';
+  configurableParams = [];
 
   constructor(
     private fb: FormBuilder,
@@ -32,7 +31,7 @@ export class CreateBotComponent implements OnInit {
         this.configData = data;
         const brokers = this.configData.configuration?.brokers || [];
         brokers.forEach((broker) => {
-          this.selectData.broker.push({name: broker.name, label: broker.name});
+          this.selectData.broker.push({name: broker.brokerName, label: broker.desc});
         });
       }
       else{
@@ -57,9 +56,9 @@ export class CreateBotComponent implements OnInit {
 
   onBrokerChange(event) {
     const brokerName = event.target.value;
-    const broker = this.configData.configuration.brokers.find((item) => item.name === brokerName);
+    const broker = this.configData.configuration.brokers.find((item) => item.brokerName === brokerName);
     this.selectData.strategy = broker.strategies.map((strategy) => {
-      return {name: strategy.name, label: strategy.name};
+      return {name: strategy.strategyName, label: strategy.desc};
     });
 
     // reset form fields and add additional params fields for the selected broker
@@ -72,41 +71,48 @@ export class CreateBotComponent implements OnInit {
     });
 
     this.additionalParams = [];
-    this.additionalParams = Object.keys(broker.additionalParams).map((key) => {
+    this.additionalParams = broker.additionalParams.map((param) => {
       return {
-        type: broker.additionalParams[key].type,
-        label: broker.additionalParams[key].title,
-        apiKey: key,
-        value: '',
-        required: broker.additionalParams[key].required,
-        placeholder: broker.additionalParams[key].desc,
+        type: param.type,
+        label: param.title,
+        apiKey: param.name,
+        value: param.default || null,
+        required: param.required,
+        placeholder: param.desc,
         placeholder2: '',
         disabled: false,
         readonly: false,
-      }
+      };
     });
     this.additionalParams.forEach((param) => {
-      this.createBotForm.addControl(param.apiKey, this.fb.control('', param.required ? Validators.required : null));
+      this.createBotForm.addControl(param.apiKey, this.fb.control(param.value||null, param.required ? Validators.required : null));
     });
   }
 
   onStrategyChange(event) {
+    this.configurableParams = [];
     const strategyName = event.target.value;
+
     const brokerName = this.createBotForm.value.broker;
-    const broker = this.configData.configuration.brokers.find((item) => item.name === brokerName);
-    const strategy = broker.strategies.find((item) => item.name === strategyName);
-    this.selectData.symbol = strategy.symbols.map((symbol) => {
-      const combinedStr = symbol.symbol + " | " + symbol.timeframes[0].timeframe;
-      return {name: combinedStr, label: combinedStr, timeframe: symbol.timeframes[0].timeframe, symbol: symbol.symbol};
+    const broker = this.configData.configuration.brokers.find((item) => item.brokerName === brokerName);
+    const strategy = broker.strategies.find((item) => item.strategyName === strategyName);
+
+    this.configurableParams = [];
+    strategy.configurableParams.forEach((param) => {
+      this.configurableParams.push({
+        type: param.type,
+        label: param.title,
+        apiKey: param.name,
+        value: param.default || null,
+        required: param.required,
+        placeholder: param.desc,
+        placeholder2: '',
+        disabled: false,
+        readonly: false,
+      });
     });
-  }
-
-  onSymbolChange(event) {
-    const symbolObj = this.selectData.symbol.find((item) => item.name === event.target.value);
-
-    this.createBotForm.patchValue({
-      symbol: symbolObj.symbol,
-      timeframe: symbolObj.timeframe,
+    this.configurableParams.forEach((param) => {
+      this.createBotForm.addControl(param.apiKey, this.fb.control(param.value||null, param.required ? Validators.required : null));
     });
   }
 
@@ -115,10 +121,15 @@ export class CreateBotComponent implements OnInit {
     Object.keys(this.createBotForm.value).forEach((key) => {
       payload[key] = this.createBotForm.value[key];
     });
-    payload['params'] = {};
+    payload['additionalParams'] = {};
     this.additionalParams.forEach((param) => {
-      payload['params'][param.apiKey] = this.createBotForm.value[param.apiKey];
+      payload['additionalParams'][param.apiKey] = this.createBotForm.value[param.apiKey];
     });
+    payload['configurableParams'] = {};
+    this.configurableParams.forEach((param) => {
+      payload['configurableParams'][param.apiKey] = this.createBotForm.value[param.apiKey];
+    });
+
     console.log("payload", payload);
 
     this.botService.createBot(payload).subscribe({
@@ -142,8 +153,8 @@ export class CreateBotComponent implements OnInit {
   resetForm(){
     this.createBotForm.reset();
     this.additionalParams = [];
+    this.configurableParams = [];
     this.selectData.strategy = [];
-    this.selectData.symbol = [];
     this.initiateForm();
   }
 
@@ -185,13 +196,13 @@ export class CreateBotComponent implements OnInit {
       // max_length: 50,
     },
     timeframe: {
-      type: 'text',
-      label: 'Timeframe',
+      type: 'number',
+      label: 'Main (T1) Timeframe (in seconds)',
       apiKey: 'timeframe',
-      value: '',
+      value: null,
       required: true,
-      placeholder: 'Enter Timeframe',
-      placeholder2: 'Enter Timeframe',
+      placeholder: 'Enter Timeframe (T1 in seconds)',
+      placeholder2: 'Enter Timeframe (T1 in seconds)',
       disabled: false,
       readonly: false,
       // max_length: 50,
@@ -211,82 +222,59 @@ export class CreateBotComponent implements OnInit {
   };
 }
 
-// example configuration data
+// example of configuration data
 // {
 //   "configuration": {
 //       "brokers": [
 //           {
-//               "name": "deriv",
+//               "brokerName": "Deriv",
+//               "desc": "Deriv Broker",
 //               "strategies": [
 //                   {
-//                       "name": "test_deriv",
-//                       "feedClass": "DerivFeed",
-//                       "symbols": [
+//                       "strategyName": "triple_ema",
+//                       "desc": "Triple EMA Strategy",
+//                       "contract_types": [
+//                           "CALE",
+//                           "PUTE"
+//                       ],
+//                       "supportingFeedKeys": [
+//                           "T2"
+//                       ],
+//                       "configurableParams": [
 //                           {
-//                               "symbol": "R_10",
-//                               "timeframes": [
-//                                   {
-//                                       "timeframe": "M1",
-//                                       "timeframeInSeconds": 60,
-//                                       "supportingSymbolAndTF": [
-//                                           {
-//                                               "symbol": "R_10",
-//                                               "timeframe": "M2",
-//                                               "timeframeInSeconds": 120
-//                                           },
-//                                           {
-//                                               "symbol": "R_10",
-//                                               "timeframe": "M3",
-//                                               "timeframeInSeconds": 180
-//                                           }
-//                                       ]
-//                                   }
-//                               ]
-//                           }
-//                       ]
-//                   },
-//                   {
-//                       "name": "reversal_mean_reversion",
-//                       "feedClass": "DerivFeed",
-//                       "symbols": [
+//                               "name": "T2",
+//                               "type": "number",
+//                               "title": "T2 Timeframe(in seconds)",
+//                               "desc": "The timeframe for T2 feed (tide)",
+//                               "required": true
+//                           },
 //                           {
-//                               "symbol": "R_10",
-//                               "timeframes": [
-//                                   {
-//                                       "timeframe": "M1",
-//                                       "timeframeInSeconds": 60,
-//                                       "supportingSymbolAndTF": [
-//                                           {
-//                                               "symbol": "R_10",
-//                                               "timeframe": "M2",
-//                                               "timeframeInSeconds": 120
-//                                           },
-//                                           {
-//                                               "symbol": "R_10",
-//                                               "timeframe": "M3",
-//                                               "timeframeInSeconds": 180
-//                                           }
-//                                       ]
-//                                   }
-//                               ]
+//                               "name": "payout",
+//                               "type": "number",
+//                               "title": "Payout",
+//                               "desc": "The minimum payout for the contract",
+//                               "required": false,
+//                               "default": 0.9
 //                           }
 //                       ]
 //                   }
 //               ],
-//               "additionalParams": {
-//                   "appId": {
+//               "additionalParams": [
+//                   {
+//                       "name": "appId",
 //                       "type": "number",
-//                       "required": true,
 //                       "title": "Application ID",
-//                       "desc": "The application ID provided by the broker."
+//                       "desc": "The application ID provided by the broker.",
+//                       "required": true
 //                   },
-//                   "authToken": {
-//                       "type": "string",
-//                       "required": true,
+//                   {
+//                       "name": "authToken",
+//                       "type": "text",
 //                       "title": "Authentication Token",
-//                       "desc": "The authentication token provided by the broker."
+//                       "desc": "The authentication token provided by the broker.",
+//                       "required": true
 //                   }
-//               }
+//               ]
 //           }
 //       ]
 //   },
